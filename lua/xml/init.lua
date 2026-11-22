@@ -1,5 +1,18 @@
 local M = {}
 
+-- Upstream folds `element` whole, which hides its closing tag when closed. Ending
+-- the fold one line early keeps `</tag>` on screen under the opening line.
+-- Elements with nothing between their tags get no fold of their own.
+local FOLDS = [[
+((element) @fold
+  (#offset! @fold 0 0 -1 0))
+
+[
+  (doctypedecl)
+  (Comment)
+] @fold
+]]
+
 --- Install the buffer-local `>` mapping.
 ---@param buf integer
 local function attach(buf)
@@ -25,8 +38,13 @@ function M.setup()
 		return
 	end
 
-	-- The parser gives highlighting, element folds and tree-sitter indenting.
-	-- Installing it re-runs the buffer start for XML buffers already open.
+	-- `query.set` rather than a queries/xml/folds.scm file: which of two files wins
+	-- depends on runtimepath order, and the installer syncs the upstream one into
+	-- BeastVim's site dir.
+	vim.treesitter.query.set("xml", "folds", FOLDS)
+
+	-- The parser gives highlighting and the folds above. Installing it re-runs the
+	-- buffer start for XML buffers already open.
 	Treesitter.ensure_parser("xml")
 
 	vim.api.nvim_create_autocmd("FileType", {

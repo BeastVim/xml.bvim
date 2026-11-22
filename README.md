@@ -7,6 +7,20 @@ standalone.
 On load it ensures the tree-sitter `xml` parser, which gives xml buffers highlighting
 and folds that follow the element structure.
 
+## Folds
+
+A fold covers what is between an element's tags, so a closed element still reads as a pair:
+
+```xml
+<app:group name="inner">
+</app:group>
+```
+
+An element with nothing between its tags (one-line, or tags on neighbouring lines) has no
+fold of its own; `zc` closes the enclosing one. Multi-line comments and the doctype fold as
+in the upstream query. The plugin replaces the `folds` query for `xml` with
+`vim.treesitter.query.set`.
+
 ## Auto-close tag
 
 Typing the `>` of an opening tag writes the closing tag and leaves the cursor between
